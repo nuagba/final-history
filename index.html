@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#173b69">
+  <title>야르한 역사 | 문화유산 탐험</title>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+  >
+  <link rel="stylesheet" href="style.css">
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
+    defer
+  ></script>
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+  <section id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="brand-mark">
+        ✦ <span class="brand-stamp">EXPLORER PASS</span>
+      </div>
+
+      <p class="eyebrow">HISTORY EXPLORER</p>
+      <h1>야르한 역사</h1>
+
+      <p class="subtle">
+        지도를 탐험하고, 문화유산을 발견하고,
+        나만의 도감을 완성해 봐!
+      </p>
+
+      <label for="loginId">아이디</label>
+      <input
+        id="loginId"
+        autocomplete="username"
+        placeholder="시연용 아이디"
+      >
+
+      <label for="loginPassword">비밀번호</label>
+      <input
+        id="loginPassword"
+        type="password"
+        autocomplete="current-password"
+        placeholder="시연용 비밀번호"
+      >
+
+      <p id="loginMessage" class="feedback" aria-live="polite"></p>
+
+      <div class="login-actions">
+        <button id="loginButton" class="primary">로그인</button>
+        <button id="signupButton" class="secondary">회원가입</button>
+      </div>
+
+      <p class="footnote">
+        시연용 계정이야. 실제 사용하는 비밀번호는 입력하지 마.
+        계정과 기록은 이 기기에만 저장돼.
+      </p>
+    </div>
+  </section>
+
+  <main id="gameScreen" class="app-shell" hidden>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">EXPLORE · LEARN · COLLECT</p>
+        <h1>야르한 역사</h1>
+      </div>
+
+      <div class="top-actions">
+        <span id="welcomeUser" class="user-pill"></span>
+
+        <button id="bookButton" class="secondary">
+          📖 도감 <span id="collectionCount">0 / 11</span>
+        </button>
+
+        <button id="logoutButton" class="ghost">
+          로그아웃
+        </button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="map-panel dotted-panel">
+        <div class="map-toolbar">
+          <button id="virtualButton" class="mode-button active">
+            🕹 가상 이동
+          </button>
+
+          <button id="gpsButton" class="mode-button">
+            📍 실제 GPS
+          </button>
+
+          <button id="gisButton" class="mode-button">
+            ◉ GIS 반경
+          </button>
+
+          <button id="centerButton" class="mode-button">
+            ◎ 내 위치
+          </button>
+
+          <button id="schoolButton" class="mode-button">
+            🏫 학교 시연
+          </button>
+        </div>
+
+        <div class="map-frame">
+          <div class="map-corner-label">
+            HERITAGE QUEST <span>✦</span> 2026
+          </div>
+
+          <div
+            id="map"
+            aria-label="문화유산 탐험 지도"
+            style="width:100%;height:100%;min-height:480px"
+          ></div>
+
+          <div id="mapStatus" class="map-status" aria-live="polite">
+            지도를 불러오는 중…
+          </div>
+
+          <div
+            id="joystick"
+            class="joystick"
+            aria-label="가상 이동 조이스틱"
+          >
+            <div id="joystickKnob" class="joystick-knob"></div>
+          </div>
+
+          <div class="map-legend">
+            🧭 이동: 조이스틱 / WASD · 문화유산 근처 자동 감속
+          </div>
+        </div>
+
+        <p id="gisInfo" class="map-hint">
+          문화유산 300m 이내에서 접근 안내,
+          100m 이내에서 발견 창이 자동으로 열려요.
+        </p>
+      </section>
+
+      <aside class="side-panel dotted-panel">
+        <h2>
+          탐험 장소 <span class="count">11곳</span>
+        </h2>
+
+        <p class="subtle small">
+          광주 5곳 · 전국 5곳 · 학교 시연 1곳
+        </p>
+
+        <div class="filter-row">
+          <button class="filter active" data-filter="all">전체</button>
+          <button class="filter" data-filter="gwangju">광주</button>
+          <button class="filter" data-filter="national">전국</button>
+          <button class="filter" data-filter="demo">시연</button>
+        </div>
+
+        <div id="placeList" class="place-list"></div>
+
+        <div class="notice">
+          <strong>GPS 안내</strong>
+          <p>
+            위치 정확도가 낮으면 발견 판정을 기다려야 해.
+            실내에서는 GPS 오차가 커질 수 있어.
+          </p>
+        </div>
+      </aside>
+    </div>
+
+    <section id="collectionBook" class="collection-section" hidden>
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">MY COLLECTION</p>
+          <h2>나의 문화유산 도감</h2>
+        </div>
+
+        <button id="closeBookButton" class="ghost">
+          닫기 ✕
+        </button>
+      </div>
+
+      <p id="collectionMessage" class="subtle"></p>
+
+      <div class="progress">
+        <div id="totalProgress"></div>
+      </div>
+
+      <div id="collectionList" class="collection-grid"></div>
+
+      <button id="resetButton" class="danger-link">
+        도감 수집 기록 초기화
+      </button>
+    </section>
+  </main>
+
+  <div id="discovery" class="modal-backdrop" hidden>
+    <section
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="monumentName"
+    >
+      <button
+        id="closeDiscoveryButton"
+        class="modal-close"
+        aria-label="닫기"
+      >✕</button>
+
+      <p id="monumentCategory" class="eyebrow"></p>
+      <h2 id="monumentName"></h2>
+
+      <div class="meta">
+        <span id="monumentPeriod"></span>
+        <span id="monumentLocation"></span>
+        <span id="monumentRarity"></span>
+      </div>
+
+      <img
+        id="monumentImage"
+        class="monument-image"
+        alt="문화유산 사진"
+        hidden
+      >
+
+      <div id="monumentDescription" class="description"></div>
+
+      <div class="distance-box">
+        <strong id="monumentDistance"></strong>
+        <p id="collectMessage" aria-live="polite"></p>
+      </div>
+
+      <h3>📷 현장 사진 첨부</h3>
+
+      <p class="subtle small">
+        직접 촬영한 사진을 첨부해 봐.
+        시연에서는 준비한 사진을 선택할 수 있어.
+      </p>
+
+      <input
+        id="photoInput"
+        type="file"
+        accept="image/*"
+        capture="environment"
+      >
+
+      <img
+        id="photoPreview"
+        class="photo-preview"
+        alt="선택한 사진 미리보기"
+        hidden
+      >
+
+      <h3>
+        📜 역사 퀴즈 <span id="quizCount"></span>
+      </h3>
+
+      <div class="progress">
+        <div id="quizProgress"></div>
+      </div>
+
+      <div id="quizContainer"></div>
+
+      <button id="collectButton" class="primary full" disabled>
+        🔒 아직 해금할 수 없어요
+      </button>
+    </section>
+  </div>
+
+  <div id="detail" class="modal-backdrop" hidden>
+    <section class="modal compact" role="dialog" aria-modal="true">
+      <button id="closeDetailButton" class="modal-close">✕</button>
+
+      <p class="eyebrow">COLLECTION COMPLETE</p>
+      <div class="stamp">수집<br>완료</div>
+
+      <h2 id="detailName"></h2>
+
+      <div class="meta">
+        <span id="detailPeriod"></span>
+        <span id="detailLocation"></span>
+      </div>
+
+      <div id="detailDescription" class="description"></div>
+
+      <img
+        id="detailPhoto"
+        class="photo-preview"
+        alt="저장된 수집 사진"
+        hidden
+      >
+    </section>
+  </div>
+
+  <div id="stampOverlay" class="modal-backdrop stamp-overlay" hidden>
+    <div class="stamp-card">
+      <div class="stamp">수집<br>완료</div>
+      <strong id="stampName"></strong>
+      <p>화면을 누르면 닫혀요</p>
+    </div>
+  </div>
+</body>
+</html>
